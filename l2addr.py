@@ -49,9 +49,11 @@ def main():
 
     # Create the address field
     df['L2Addr'] = df.apply(lambda row: f"{row['Xa']}, {row['Huyen']}, {map_ma_tinh(row['MaTinh'])}", axis=1)
+    df['Tinh'] = df.apply(lambda row: f"{map_ma_tinh(row['MaTinh'])}", axis=1)
 
     # Create a new DataFrame with key fields
-    new_df = df[['MaSo', 'L2Addr', 'VaoVien', 'RaVien', 'DiaChi', 'Ap', 'Xa', 'Huyen', 'MaTinh']]
+    new_df = df[['MaSo', 'L2Addr', 'VaoVien', 'RaVien', 'DiaChi', 'Ap', 'Xa', 'Huyen', 'Tinh']]
+    
 
     # Create the output filename based on the input filename
     input_filename, input_extension = os.path.splitext(input_csv_file)
