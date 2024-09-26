@@ -263,7 +263,7 @@ def convert_excel_to_geojson(folder_path, rate_limit=1):
                         feature = create_geojson_structure(row, longitude, latitude, address)
                         file_name = os.path.join(folder_path, f"{row['MaSo']}.geojson")
                         #save_geojson(feature, file_name) #update filename
-                        #save_to_mongodb(feature)
+                        save_to_mongodb(feature)
                         # Mark the row as processed
                         df.at[index, 'Processed'] = True                        
                         success_count += 1
