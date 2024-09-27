@@ -99,13 +99,13 @@ def save_to_mongodb(geojson_feature):
     :param mongo_uri: The MongoDB connection URI including username and password (default: 'mongodb://username:password@localhost:27017/').
     :param auth_source: The authentication database (default: 'admin').
     """
-    host = "222.252.21.66:7217"
-    username = "oct_user_db"
-    password = urllib.parse.quote("oct@user@123")
-    auth_source = "admin"
-    mongo_uri = f"mongodb://{username}:{password}@{host}/"
-    db_name = 'oct_e_dengue'
-    collection_name = 'historical_cases'
+    host = 
+    username = 
+    password = 
+    auth_source = 
+    mongo_uri = 
+    db_name = 
+    collection_name = 
 
     try:
         # Create a MongoDB client with authentication
