@@ -72,11 +72,25 @@ def geocode_address_1(address, rate_limit=1):
         print(f"Geocoding error: {e}")
         return None
 
-# Geocode address
+# Function to geocode the address and use cache if available
 def geocode_address(address):
+   
+    # Check if the address has already been geocoded
+    if address in geocoded_cache:
+        print("Using cached geocode for:", address)
+        return geocoded_cache[address]
+    
+    # If the address is not cached, perform geocoding
+    # Initialize geolocator with user_agent
+    agent_name = "edgcoder_" + str(random.randint(1, 100))
+    geolocator = Nominatim(user_agent=agent_name)
     try:
+
         location = geolocator.geocode(address, timeout=10)
         if location:
+            # Store the geocoded result in the cache
+            geocoded_cache[address] = (location.latitude, location.longitude)
+            print("Geocoding and caching:", address)
             return location.latitude, location.longitude
         else:
             return None
@@ -99,13 +113,13 @@ def save_to_mongodb(geojson_feature):
     :param mongo_uri: The MongoDB connection URI including username and password (default: 'mongodb://username:password@localhost:27017/').
     :param auth_source: The authentication database (default: 'admin').
     """
-    host = 
-    username = 
-    password = 
-    auth_source = 
-    mongo_uri = 
-    db_name = 
-    collection_name = 
+    host = "222.252.21.66:7217"
+    username = "oct_user_db"
+    password = urllib.parse.quote("oct@user@123")
+    auth_source = "admin"
+    mongo_uri = f"mongodb://{username}:{password}@{host}/"
+    db_name = 'oct_e_dengue'
+    collection_name = 'historical_cases'
 
     try:
         # Create a MongoDB client with authentication
@@ -115,6 +129,14 @@ def save_to_mongodb(geojson_feature):
         db = client[db_name]
         collection = db[collection_name]
 
+        # Check if a feature with the same patient_id already exists        
+        patient_id = geojson_feature['properties'].get('patient', {}).get('id')
+        existing_feature = collection.find_one({"properties.patient.id": patient_id})
+    
+        if existing_feature:
+            print(f"Feature with patient_id {patient_id} already exists. Skipping insertion.")
+            return
+    
         # Insert the GeoJSON feature into the collection
         result = collection.insert_one(geojson_feature)
         print(f"Feature inserted with ID: {result.inserted_id}")
@@ -169,11 +191,11 @@ def create_geojson_structure(row, longitude, latitude, address):
         "properties": {
             "address": {
                 "postal": address,
-                "level4": row['Ap'],
-                "level3": row['Xa'],
-                "level2": row['Huyen'],
+                "level0": "Việt Nam",
                 "level1": map_ma_tinh(row['MaTinh']),
-                "level0": "VIET NAM"
+                "level2": row['Huyen'],
+                "level3": row['Xa'],
+                "level4": row['Ap'],
             },
             "patient": {
                 "id": row['MaSo'],
@@ -273,7 +295,8 @@ def convert_excel_to_geojson(folder_path, rate_limit=1):
                         failed_count += 1
 
                     #print(f"Processed {processed_count}/{total_rows}", end='') 
-                    print(f"\r{success_count} successful, {failed_count} failed", end='')
+                    #print(f"\r{success_count} successful, {failed_count} failed", end='')
+                    print(f"{success_count} successful, {failed_count} failed")
                     time.sleep(1 / rate_limit)  # Rate limiting the requests
         
                 # Save failed rows to a CSV if any
@@ -291,10 +314,8 @@ if __name__ == "__main__":
         sys.exit(1)
     folder_path = sys.argv[1]
     '''
-
-    agent_name = "edgcoder_" + str(random.randint(1, 100))
-    # Initialize geolocator with user_agent
-    geolocator = Nominatim(user_agent=agent_name)
+    # Initialize a dictionary to store geocoded addresses
+    geocoded_cache = {}    
     # Initialize signal handler
     signal.signal(signal.SIGINT, signal_handler)
     # Flag to handle graceful shutdown
